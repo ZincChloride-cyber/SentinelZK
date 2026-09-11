@@ -135,11 +135,6 @@ console.log('Contract verified safe by Midnight ZK Oracle!')
 
 ---
 
-## 🏆 Hackathon Context
-
-SentinelZK is built for the **Akindo WaveHack — Midnight Network Track**:
-- **Target:** Privacy-preserving security infrastructure for decentralized finance.
-- **Technology:** Midnight Network ZK Smart Contracts (Compact), zero-knowledge threshold proofs, and off-chain machine learning security pipelines.
 
 ---
 
