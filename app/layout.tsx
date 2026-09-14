@@ -3,7 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'SentinelZK — Know what’s safe to sign',
+  title: "SentinelZK: Know what's safe to sign",
   description: 'Cryptographically verified smart contract attestations before you interact onchain.',
   generator: 'SentinelZK',
 }

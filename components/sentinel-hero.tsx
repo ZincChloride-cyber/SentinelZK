@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import Link from 'next/link'
 
 const DEFAULT_FRAGMENT = `#version 300 es
 precision highp float;
@@ -58,11 +59,11 @@ export type SentinelHeroProps = {
 
 export default function SentinelHero({
   title = "Know What's Safe to Sign.",
-  subtitle = 'ML-powered rug-pull & exploit detection with zero-knowledge attestations on Midnight. Cryptographically verify pool safety before you sign, without revealing proprietary model weights or tipping off attackers.',
+  subtitle = 'Check a contract before you interact. SentinelZK scores risk off-chain, then posts a zero-knowledge safety attestation on Midnight, without exposing the model that produced it.',
   ctaLabel = 'Inspect Contract',
-  ctaHref = '#inspector',
+  ctaHref = '/inspector',
   secondaryCtaLabel = 'How ZK Works',
-  secondaryCtaHref = '#how-it-works',
+  secondaryCtaHref = '/how-it-works',
   fragmentSource = DEFAULT_FRAGMENT,
   height = '85vh',
   className = '',
@@ -152,52 +153,34 @@ export default function SentinelHero({
       <div className="absolute inset-0 bg-gradient-to-b from-slate-950/40 via-slate-950/70 to-slate-950 pointer-events-none" aria-hidden="true" />
       
       <div className="relative z-10 flex min-h-full items-center justify-center px-4 sm:px-6 lg:px-8 py-20 text-center">
-        <div className="max-w-4xl mx-auto">
-          {/* Tagline */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-4 py-1.5 text-xs font-semibold text-cyan-300 backdrop-blur-md mb-6 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
-            <span className="h-2 w-2 rounded-full bg-cyan-400 animate-ping" />
-            <span>MIDNIGHT NETWORK • ZERO-KNOWLEDGE EXPLOIT ORACLE</span>
-          </div>
+        <div className="max-w-3xl mx-auto">
+          <p className="mb-5 text-sm font-medium tracking-wide text-cyan-300/90">
+            SentinelZK on Midnight
+          </p>
 
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.05]">
-            Know What&apos;s <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400">Safe to Sign</span>
+            Know What&apos;s <span className="text-cyan-400">Safe to Sign</span>
           </h1>
 
-          <p className="mt-6 text-base sm:text-lg lg:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-6 text-base sm:text-lg text-slate-300 max-w-xl mx-auto leading-relaxed">
             {subtitle}
           </p>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <a
+            <Link
               href={ctaHref}
-              className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-3.5 text-sm font-bold text-slate-950 hover:from-cyan-400 hover:to-blue-500 transition shadow-[0_0_25px_rgba(6,182,212,0.3)] hover:scale-105"
+              className="inline-flex items-center justify-center rounded-xl bg-cyan-500 px-6 py-3.5 text-sm font-bold text-slate-950 hover:bg-cyan-400 transition"
             >
               {ctaLabel}
-            </a>
-            {secondaryCtaLabel && (
-              <a
+            </Link>
+            {secondaryCtaLabel && secondaryCtaHref && (
+              <Link
                 href={secondaryCtaHref}
                 className="inline-flex items-center justify-center rounded-xl border border-white/20 bg-slate-900/60 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-md hover:bg-slate-800/80 transition"
               >
                 {secondaryCtaLabel}
-              </a>
+              </Link>
             )}
-          </div>
-
-          {/* Quick Stats Pill Strip */}
-          <div className="mt-14 grid grid-cols-2 sm:grid-cols-3 gap-4 border-t border-white/10 pt-8 max-w-2xl mx-auto">
-            <div>
-              <div className="text-2xl font-extrabold font-mono text-white">1,480+</div>
-              <div className="text-xs text-slate-400 mt-0.5">Pools Monitored</div>
-            </div>
-            <div>
-              <div className="text-2xl font-extrabold font-mono text-cyan-400">100%</div>
-              <div className="text-xs text-slate-400 mt-0.5">Private Model Weights</div>
-            </div>
-            <div className="col-span-2 sm:col-span-1">
-              <div className="text-2xl font-extrabold font-mono text-emerald-400">ZK-Verified</div>
-              <div className="text-xs text-slate-400 mt-0.5">On Midnight Preprod</div>
-            </div>
           </div>
         </div>
       </div>

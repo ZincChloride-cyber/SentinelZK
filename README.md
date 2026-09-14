@@ -4,7 +4,7 @@
 
 SentinelZK is an intelligent on-chain security oracle. It analyzes smart contracts and liquidity pools for exploit and rug-pull risks, generating **Zero-Knowledge (ZK) safety attestations** verified on the Midnight Network.
 
-DeFi protocols, wallets, and users can verify whether a contract is safe before interacting with it — **without revealing the underlying machine learning model or proprietary detection rules** that attackers could exploit to evade detection.
+DeFi protocols, wallets, and users can verify whether a contract is safe before interacting with it, **without revealing the underlying machine learning model or proprietary detection rules** that attackers could exploit to evade detection.
 
 ---
 
@@ -135,6 +135,11 @@ console.log('Contract verified safe by Midnight ZK Oracle!')
 
 ---
 
+## 🏆 Hackathon Context
+
+SentinelZK is built for the **Akindo WaveHack, Midnight Network Track**:
+- **Target:** Privacy-preserving security infrastructure for decentralized finance.
+- **Technology:** Midnight Network ZK Smart Contracts (Compact), zero-knowledge threshold proofs, and off-chain machine learning security pipelines.
 
 ---
 
