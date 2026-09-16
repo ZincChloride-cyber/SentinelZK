@@ -1,0 +1,9 @@
+node_modules/
+logs/
+midnight-level-db/
+.env
+.env.local
+.env.preprod
+.env.preview
+deployment.json
+*.log

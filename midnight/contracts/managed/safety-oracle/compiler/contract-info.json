@@ -1,0 +1,119 @@
+{
+  "compiler-version": "0.30.0",
+  "language-version": "0.22.0",
+  "runtime-version": "0.15.0",
+  "circuits": [
+    {
+      "name": "submitAttestation",
+      "pure": false,
+      "proof": true,
+      "arguments": [
+        {
+          "name": "target",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        },
+        {
+          "name": "attestedAt",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "hasAttestation",
+      "pure": false,
+      "proof": true,
+      "arguments": [
+        {
+          "name": "target",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Boolean"
+      }
+    },
+    {
+      "name": "getAttestation",
+      "pure": false,
+      "proof": true,
+      "arguments": [
+        {
+          "name": "target",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Struct",
+        "name": "PublicAttestation",
+        "elements": [
+          {
+            "name": "isSafe",
+            "type": {
+              "type-name": "Boolean"
+            }
+          },
+          {
+            "name": "modelHash",
+            "type": {
+              "type-name": "Bytes",
+              "length": 32
+            }
+          },
+          {
+            "name": "threshold",
+            "type": {
+              "type-name": "Uint",
+              "maxval": 255
+            }
+          },
+          {
+            "name": "attestedAt",
+            "type": {
+              "type-name": "Uint",
+              "maxval": 18446744073709551615
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "witnesses": [
+    {
+      "name": "privateRiskScore",
+      "arguments": [
+      ],
+      "result type": {
+        "type-name": "Uint",
+        "maxval": 255
+      }
+    },
+    {
+      "name": "privateModelHash",
+      "arguments": [
+      ],
+      "result type": {
+        "type-name": "Bytes",
+        "length": 32
+      }
+    }
+  ],
+  "contracts": [
+  ]
+}

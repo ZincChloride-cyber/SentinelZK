@@ -1,0 +1,8 @@
+{
+  "version": 3,
+  "file": "index.js",
+  "sourceRoot": "../../../../",
+  "sources": ["contracts/SafetyOracle.compact"],
+  "names": [],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EA6CA;;;;;;;;;;;;;;;;MAWA,AAAA,iBAqBC;;;;;cArBgC,QAAiB;cAAE,YAAoB;;;;;;;;;;;;;;;;;;;;;;;;;yCAAvC,QAAiB,+BAAE,YAAoB;;;;;;;;;mDAAvC,QAAiB;mDAAE,YAAoB;;;OAqBvE;MAED,AAAA,cAEC;;;;;cAF6B,QAAiB;;;;;;;;;;;;;;;;;;yCAAjB,QAAiB;;;;;;;;;gDAAjB,QAAiB;;;OAE9C;MAED,AAAA,cAGC;;;;;cAH6B,QAAiB;;;;;;;;;;;;;;;;;;yCAAjB,QAAiB;;;;;;;;;gDAAjB,QAAiB;;;OAG9C;;;;;;;;;;;;GApCA;EALD;;;;;UAAY,WAAoB;UAAE,WAAkB;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;IAnBpD;;;;;;;;;yEAA2C;IAI3C;;;;;;;;;yEAAuC;IAIvC;;;;;;;;;;yEAA8D;IAG9D;;;;;;;;;yEAAwC;4BAS/B,WAAS;4BACT,WAAS;IAChB;;;;;;;2HAA6B,WAAS;;yEAArB;IACjB;;;;;;;2HAA2B,WAAS;;yEAArB;;;;;;;GAChB;EARD,AAAA,mBAAoC;;0DAApC,gBAAoC;;;;;;;;;;;;;;GAAA;EACpC,AAAA,mBAAsC;;0DAAtC,gBAAsC;;;;;;;;;;;;;;GAAA;EAatC,AAAA,oBAqBC,4BArBgC,QAAiB,EAAE,YAAoB;UAChE,OAA0B;UAC1B,eAAkC;4BAEjC,OAAK;0CAEV,eAAa;kEAAI;;;;;;;;;;;uIAAiB;;UAI9B,QAAgC,GAAvB,OAAK;;6CAAG;;;;;;;;;;;kHAAe;UAEhC,aAKL,aAJkB,QAAM;uCACH,eAAa;;sDACb;;;;;;;;;;;2HAAe;wCACd,YAAU;IAGjC;;;;;;;;;;2HAA6B,QAAM;;;2HAAG,aAAW;;;wEAArC;UACZ,KAAgB;IAAhB;;;;;;;;;;6FAAA,KAAgB;;;;wEAAA;;GACjB;EAED,AAAA,iBAEC,4BAF6B,QAAiB;mCACtC;;;;;;;;;;;0JAA6B,QAAM;;;;wGAAvB;GACpB;EAED,AAAA,iBAGC,4BAH6B,QAAiB;oDACtC;;;;;;;;;;;2KAA6B,QAAM;;;;yHAAvB;;mCACZ;;;;;;;;;;;;;;8HAA6B,QAAM;;;wGAAvB;GACpB;;;;;;;;;;;;;;;;;;;;IA5DD;qCAAA;;;;;;;;;;;0GAA2C;KAAA;IAI3C;qCAAA;;;;;;;;;;;0GAAuC;KAAA;IAIvC;;;;;uCAAA;;;;;;;;;;;;;;;;4GAA8D;;;;;;uCAA9D;;;;;;;;;;;;4GAA8D;;;;;;;;;;;;;;uCAA9D;;;;;;;;;;;;;;;4GAA8D;;;;;;;;;;;;;;uCAA9D;;;;;;;;;;;;;;;;;4GAA8D;;;;;;;;;KAAA;IAG9D;qCAAA;;;;;;;;;;;0GAAwC;KAAA;;;;;;;;;;;;;"
+}

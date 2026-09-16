@@ -7,21 +7,35 @@ __v0_jsx-dev-runtime.ts
 .vercel/
 
 # Environment variables
+.env
 .env*.local
+.env.preprod
+.env.preview
+midnight/.env
+midnight/.env.preprod
+midnight/.env.preview
 
 # Common ignores
 node_modules
 .next/
 .DS_Store
 
-# Markdown files (ignore all except root README.md)
+# Markdown files (ignore all except documented project files)
 *.md
 !/README.md
 !/readme.md
 !/ml/README.md
+!/docs/*.md
+!/midnight/README.md
 
 # Python ML
 ml/.venv/
 ml/**/__pycache__/
 ml/**/*.pyc
 *.egg-info/
+
+# Midnight local runtime
+midnight/node_modules/
+midnight/midnight-level-db/
+midnight/deployment.json
+midnight/logs/

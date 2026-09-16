@@ -11,6 +11,9 @@ importers:
       '@base-ui/react':
         specifier: ^1.5.0
         version: 1.5.0(@date-fns/tz@1.4.1)(@types/react@19.2.14)(date-fns@4.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@midnight-ntwrk/dapp-connector-api':
+        specifier: 4.0.1
+        version: 4.0.1
       '@types/three':
         specifier: ^0.185.4
         version: 0.185.4
@@ -456,6 +459,9 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@midnight-ntwrk/dapp-connector-api@4.0.1':
+    resolution: {integrity: sha512-IstRo8xfmlJlGgUcAJeRzPUmGCp0/xZR3/bfTOk33MHrzbGmB79r/zYziGavcclo1pkkoBHAodX4vz3xgFxczw==}
 
   '@modelcontextprotocol/sdk@1.29.0':
     resolution: {integrity: sha512-zo37mZA9hJWpULgkRpowewez1y6ML5GsXJPY8FI0tBBCd77HEvza4jDqRKOXgHNn867PVGCyTdzqpz0izu5ZjQ==}
@@ -2284,6 +2290,8 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@midnight-ntwrk/dapp-connector-api@4.0.1': {}
 
   '@modelcontextprotocol/sdk@1.29.0(zod@3.25.76)':
     dependencies:

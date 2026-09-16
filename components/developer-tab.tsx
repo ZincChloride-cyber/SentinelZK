@@ -14,16 +14,25 @@ const oracle = new SentinelOracleClient({ network: 'preprod' })
 const { isSafe, proofRef } = await oracle.getSafetyAttestation(poolAddress)
 if (!isSafe) throw new Error(\`Blocked: \${proofRef}\`)`
 
-  const compactCode = `export struct Attestation {
-  isSafe: Boolean,
-  timestamp: Uint<64>,
-  proofRef: Bytes<32>
-}
+  const compactCode = `pragma language_version 0.22;
+import CompactStandardLibrary;
 
-export ledger attestations: Map<Address, Attestation>;
+witness privateRiskScore(): Uint<8>;
+witness privateModelHash(): Bytes<32>;
 
-export circuit getSafetyAttestation(target: Address): Attestation {
-  return attestations.lookup(target);
+export ledger expectedModelHash: Bytes<32>;
+export ledger safetyThreshold: Uint<8>;
+export ledger attestations: Map<Bytes<32>, PublicAttestation>;
+
+export circuit submitAttestation(target: Bytes<32>, attestedAt: Uint<64>): [] {
+  assert(privateModelHash() == expectedModelHash, "bad model");
+  const isSafe = privateRiskScore() < safetyThreshold;
+  attestations.insert(disclose(target), PublicAttestation {
+    isSafe: disclose(isSafe),
+    modelHash: disclose(privateModelHash()),
+    threshold: disclose(safetyThreshold),
+    attestedAt: disclose(attestedAt)
+  });
 }`
 
   const handleCopy = () => {

@@ -14,6 +14,10 @@ import {
 import { SentinelService, DEMO_PRESETS } from '@/lib/sentinel-service'
 import { ContractSafetyAttestation, AnalysisProgress } from '@/lib/types'
 import { AttestationVerdictTile } from '@/components/tiles/attestation-verdict-tile'
+import { useMockOracle } from '@/lib/midnight/config'
+import { MidnightClientError } from '@/lib/midnight/errors'
+import { submitSafetyAttestation } from '@/lib/midnight/client'
+import { useMidnightWallet } from '@/components/wallet/MidnightWalletProvider'
 
 export function ContractInspector() {
   const [targetAddress, setTargetAddress] = useState(
@@ -23,13 +27,27 @@ export function ContractInspector() {
     null
   )
   const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [isPublishing, setIsPublishing] = useState(false)
   const [progress, setProgress] = useState<AnalysisProgress | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const mockOracle = useMockOracle()
+  const wallet = useMidnightWallet()
 
   // Initialize with the safe pool preset on mount
   useEffect(() => {
-    SentinelService.getAttestation(targetAddress).then((data) => {
-      setAttestation(data)
-    })
+    SentinelService.getAttestation(targetAddress)
+      .then((data) => {
+        setAttestation(data)
+        setError(null)
+      })
+      .catch((err) => {
+        setAttestation(null)
+        setError(
+          err instanceof MidnightClientError
+            ? err.userMessage
+            : 'Could not load the attestation.',
+        )
+      })
   }, [])
 
   const handleInspect = async (addressToInspect?: string) => {
@@ -38,6 +56,7 @@ export function ContractInspector() {
 
     setIsAnalyzing(true)
     setProgress(null)
+    setError(null)
 
     try {
       const result = await SentinelService.analyzeWithProgress(
@@ -48,9 +67,41 @@ export function ContractInspector() {
       )
       setAttestation(result)
     } catch (err) {
-      console.error('Failed to analyze contract:', err)
+      setAttestation(null)
+      setError(
+        err instanceof MidnightClientError
+          ? err.userMessage
+          : 'Could not verify this contract.',
+      )
     } finally {
       setIsAnalyzing(false)
+    }
+  }
+
+  const handlePublish = async () => {
+    if (!targetAddress.trim() || mockOracle) return
+    if (!wallet.connected) {
+      setError('Connect a Midnight wallet before publishing an attestation.')
+      return
+    }
+    if (wallet.wrongNetwork) {
+      setError(wallet.error ?? 'Switch the wallet to the expected Midnight network.')
+      return
+    }
+
+    setIsPublishing(true)
+    setError(null)
+    try {
+      const result = await submitSafetyAttestation({ target: targetAddress.trim() })
+      setAttestation(result)
+    } catch (err) {
+      setError(
+        err instanceof MidnightClientError
+          ? err.userMessage
+          : 'Could not publish the attestation.',
+      )
+    } finally {
+      setIsPublishing(false)
     }
   }
 
@@ -72,6 +123,9 @@ export function ContractInspector() {
         </h2>
         <p className="mt-3 text-base text-slate-300">
           Query on-chain zero-knowledge safety attestations. Our Compact circuit binds the ML model integrity hash and validates the risk threshold without exposing the underlying detection weights.
+        </p>
+        <p className="mt-2 text-xs font-mono text-slate-400">
+          Oracle source: {mockOracle ? 'mock / demo fallback' : 'Midnight SafetyOracle'}
         </p>
       </div>
 
@@ -117,6 +171,16 @@ export function ContractInspector() {
         {/* Demo Preset Buttons */}
         <div className="mt-4 flex flex-wrap items-center gap-2 pt-2 border-t border-white/5 text-xs">
           <span className="text-slate-400 font-medium mr-1">Demo Scenarios:</span>
+          {!mockOracle ? (
+            <button
+              type="button"
+              onClick={() => void handlePublish()}
+              disabled={isPublishing || isAnalyzing}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-1 text-cyan-300 hover:opacity-80 disabled:opacity-50"
+            >
+              {isPublishing ? 'Publishing…' : 'Publish to Midnight'}
+            </button>
+          ) : null}
           {DEMO_PRESETS.map((preset) => (
             <button
               key={preset.address}
@@ -155,6 +219,12 @@ export function ContractInspector() {
           </p>
         </div>
       )}
+
+      {error ? (
+        <div className="mx-auto max-w-4xl mt-6 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-200">
+          {error}
+        </div>
+      ) : null}
 
       {/* Attestation Verdict Tile Output */}
       {attestation && (
