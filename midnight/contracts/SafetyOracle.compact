@@ -1,0 +1,87 @@
+// SentinelZK Safety Oracle
+// Compact language 0.22 / compactc 0.30.x (installed toolchain).
+//
+// Privacy model (enforced by Compact, not by convention):
+//   PRIVATE  - circuit/witness inputs: raw risk score, submitted model hash
+//              (until explicitly disclosed)
+//   PUBLIC   - ledger: expected model hash, threshold, target key, isSafe,
+//              disclosed model hash, disclosed threshold, disclosed timestamp
+//
+// The raw risk score is NEVER written to the ledger. The circuit proves
+// `score < threshold` and only the boolean verdict is disclosed.
+
+pragma language_version 0.22;
+
+import CompactStandardLibrary;
+
+// Public attestation recorded on the Midnight ledger.
+// Intentionally has no risk-score field.
+export struct PublicAttestation {
+  isSafe: Boolean;
+  modelHash: Bytes<32>;
+  threshold: Uint<8>;
+  attestedAt: Uint<64>;
+}
+
+// Registered model integrity hash. Public configuration.
+export ledger expectedModelHash: Bytes<32>;
+
+// Safety threshold in 0..=100. Public configuration.
+// On-chain rule: isSafe <=> private_score < safetyThreshold.
+export ledger safetyThreshold: Uint<8>;
+
+// Latest public attestation per target.
+// Target keys are Bytes<32> (SHA-256 of the lowercase address, computed off-chain).
+export ledger attestations: Map<Bytes<32>, PublicAttestation>;
+
+// Count of successful submitAttestation calls (including replacements).
+export ledger attestationCount: Counter;
+
+// Private inputs supplied by the local TypeScript driver / ML adapter.
+// These callbacks never execute on-chain; only their in-circuit constraints
+// are proven.
+witness privateRiskScore(): Uint<8>;
+witness privateModelHash(): Bytes<32>;
+
+constructor(modelHash: Bytes<32>, threshold: Uint<8>) {
+  assert(threshold > 0, "Threshold must be greater than 0");
+  assert(threshold <= 100, "Threshold must be at most 100");
+  expectedModelHash = disclose(modelHash);
+  safetyThreshold = disclose(threshold);
+}
+
+// Prove model integrity and the threshold comparison, then publish the verdict.
+//
+// Private: privateRiskScore(), privateModelHash()
+// Public (disclosed / ledger): target, isSafe, modelHash, threshold, attestedAt
+export circuit submitAttestation(target: Bytes<32>, attestedAt: Uint<64>): [] {
+  const score = privateRiskScore();
+  const submittedHash = privateModelHash();
+
+  assert(score <= 100, "Risk score must be at most 100");
+  assert(
+    submittedHash == expectedModelHash,
+    "Model hash does not match the registered model"
+  );
+
+  const isSafe = score < safetyThreshold;
+
+  const attestation = PublicAttestation {
+    isSafe: disclose(isSafe),
+    modelHash: disclose(submittedHash),
+    threshold: disclose(safetyThreshold),
+    attestedAt: disclose(attestedAt)
+  };
+
+  attestations.insert(disclose(target), attestation);
+  attestationCount.increment(1);
+}
+
+export circuit hasAttestation(target: Bytes<32>): Boolean {
+  return attestations.member(disclose(target));
+}
+
+export circuit getAttestation(target: Bytes<32>): PublicAttestation {
+  assert(attestations.member(disclose(target)), "No attestation for target");
+  return attestations.lookup(disclose(target));
+}

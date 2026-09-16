@@ -1,9 +1,11 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ShieldCheck, Lock, Activity, type LucideIcon } from 'lucide-react'
+import { MidnightWalletButton } from '@/components/wallet/MidnightWalletButton'
+import { displayNetworkLabel, expectedMidnightNetwork, useMockOracle } from '@/lib/midnight/config'
 
 type NavLink = {
   href: string
@@ -20,8 +22,8 @@ const navLinks: NavLink[] = [
 ]
 
 export function Header() {
-  const [walletConnected, setWalletConnected] = useState(false)
   const pathname = usePathname()
+  const networkLabel = useMockOracle() ? 'Preprod Testnet' : displayNetworkLabel(expectedMidnightNetwork()).replace('Midnight ', '')
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-slate-950/55 backdrop-blur-xl transition-all">
@@ -69,20 +71,10 @@ export function Header() {
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/90 px-3 py-1 text-xs text-slate-300">
             <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="font-mono text-[11px]">Preprod Testnet</span>
+            <span className="font-mono text-[11px]">{networkLabel}</span>
           </div>
 
-          <button
-            onClick={() => setWalletConnected(!walletConnected)}
-            className={`inline-flex items-center gap-2 rounded-xl px-3.5 py-1.5 text-xs font-semibold transition shadow-lg ${
-              walletConnected
-                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shadow-emerald-500/10'
-                : 'bg-cyan-500 text-slate-950 hover:bg-cyan-400 shadow-cyan-500/20 hover:shadow-cyan-500/40'
-            }`}
-          >
-            <Lock className="h-3.5 w-3.5" />
-            {walletConnected ? 'Midnight Wallet: Connected' : 'Connect Wallet'}
-          </button>
+          <MidnightWalletButton />
         </div>
       </div>
     </header>

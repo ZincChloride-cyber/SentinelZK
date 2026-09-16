@@ -4,6 +4,9 @@ import {
   AnalysisProgress,
 } from './types'
 import { attestationFromMlScore, type MlScoreResponse } from './ml-attestation'
+import { getSafetyAttestation as getMidnightAttestation } from './midnight/client'
+import { useMockOracle } from './midnight/config'
+import { MidnightClientError } from './midnight/errors'
 
 function mlServiceConfigured(): boolean {
   // Server: real service URL. Browser: opt-in flag (URL stays server-only).
@@ -275,23 +278,33 @@ export const DEMO_PRESETS = [
 export class SentinelService {
   /**
    * Fetches an existing attestation for an address.
-   * If address is not pre-mocked, generates an on-the-fly realistic attestation based on address hash.
+   *
+   * Midnight vs mock:
+   * - NEXT_PUBLIC_USE_MOCK_ORACLE=true (default): keep the original demo/ML path.
+   * - false: query the deployed SafetyOracle. Mock/synthetic proofs are not used.
+   *
+   * Shared file: this is the only oracle entry the existing inspector already calls.
+   * ML scoring itself is unchanged and still owned by the ML teammate.
    */
   static async getAttestation(address: string): Promise<ContractSafetyAttestation> {
     const normalized = address.toLowerCase().trim()
 
+    if (!useMockOracle()) {
+      return getMidnightAttestation(normalized)
+    }
+
     // Prefer live GBDT scoring when the ML service is configured
     if (mlServiceConfigured()) {
       const live = await fetchMlAttestation(normalized)
-      if (live) return live
+      if (live) return { ...live, attestationSource: 'ml' }
     }
 
     if (MOCK_ATTESTATIONS[normalized]) {
-      return MOCK_ATTESTATIONS[normalized]
+      return { ...MOCK_ATTESTATIONS[normalized], attestationSource: 'mock' }
     }
 
     // Dynamic generation for arbitrary user-entered addresses
-    return this.generateSyntheticAttestation(address)
+    return { ...this.generateSyntheticAttestation(address), attestationSource: 'mock' }
   }
 
   /**
@@ -337,18 +350,38 @@ export class SentinelService {
       await new Promise((resolve) => setTimeout(resolve, step.delay))
     }
 
-    const attestation = await this.getAttestation(address)
-    
-    if (onProgress) {
-      onProgress({
-        stage: 'complete',
-        stepNumber: steps.length,
-        totalSteps: steps.length,
-        message: 'Attestation verified on Midnight ledger.',
-      })
-    }
+    try {
+      const attestation = await this.getAttestation(address)
 
-    return attestation
+      if (onProgress) {
+        onProgress({
+          stage: 'complete',
+          stepNumber: steps.length,
+          totalSteps: steps.length,
+          message: useMockOracle()
+            ? 'Demo attestation ready (mock oracle).'
+            : 'Attestation verified on Midnight ledger.',
+        })
+      }
+
+      return attestation
+    } catch (err) {
+      const message =
+        err instanceof MidnightClientError
+          ? err.userMessage
+          : err instanceof Error
+            ? err.message
+            : 'Attestation lookup failed.'
+      if (onProgress) {
+        onProgress({
+          stage: 'error',
+          stepNumber: steps.length,
+          totalSteps: steps.length,
+          message,
+        })
+      }
+      throw err
+    }
   }
 
   /**

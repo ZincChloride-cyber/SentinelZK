@@ -90,6 +90,8 @@ export interface ContractSafetyAttestation {
   proof: ZKProofMetadata
   /** Key security flags or risk drivers observed */
   riskFlags: string[]
+  /** Where the displayed attestation came from. Optional so existing mock/ML data stays valid. */
+  attestationSource?: 'mock' | 'ml' | 'midnight'
 }
 
 export interface OracleStats {

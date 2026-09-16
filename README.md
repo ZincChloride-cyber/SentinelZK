@@ -125,37 +125,147 @@ python train.py                 # bootstrap synthetic artifact
 uvicorn server:app --host 127.0.0.1 --port 8000
 ```
 
-Copy `.env.example` to `.env.local` and set `SENTINEL_ML_URL` + `NEXT_PUBLIC_SENTINEL_USE_ML=1`. Without these, the UI keeps using demo mocks.
+Copy `.env.example` to `.env.local`. Defaults keep the **mock oracle** so the UI works without Lace or Preprod.
 
-Real labeled training (later):
-
-```bash
-python train.py --csv path/to/labeled_risk.csv
+```env
+NEXT_PUBLIC_USE_MOCK_ORACLE=true
 ```
 
 ---
 
-## 💻 Developer Integration
+## Midnight Integration
 
-Integrating SentinelZK checks into your dApp takes only a few lines of code:
+Midnight is used because Compact circuits prove statements about **private** witness data and only disclose what we write to the ledger.
 
-### Querying via TypeScript SDK
+**Why Midnight:** the safety check is `private_score < threshold` bound to a registered `model_hash`. Attackers see the boolean verdict, not the score or features.
+
+**Private**
+
+- ML risk score (`privateRiskScore` witness)
+- feature vectors (never sent to Compact)
+- wallet seed / mnemonic (server env only)
+
+**Public**
+
+- target id (SHA-256 of the lowercase address)
+- `isSafe`
+- registered model hash and threshold
+- attestation timestamp
+
+**How the Compact contract works:** `midnight/contracts/SafetyOracle.compact` (language 0.22, compactc 0.30.0) stores a `Map<Bytes<32>, PublicAttestation>`. `submitAttestation` is a real impure circuit with prover/verifier keys under `midnight/contracts/managed/safety-oracle/keys/`.
+
+**How verification works:** midnight-js + a local proof server prove the circuit. Other clients read ledger state from the Preprod indexer. This is not a hash-as-proof shortcut.
+
+### Wallet Setup
+
+- Wallet: [Lace](https://www.lace.io/) with Midnight enabled
+- Network: Preprod (`NEXT_PUBLIC_MIDNIGHT_NETWORK=preprod`)
+- Proof server in Lace: `http://localhost:6300` (`npm run proof:up` in `midnight/`)
+- Connect from the header button (`wallet.connect('preprod')` via `@midnight-ntwrk/dapp-connector-api` 4.0.1)
+- Faucet: https://midnight-tmnight-preprod.nethermind.dev/
+
+### Deployment
+
+From WSL or Linux/macOS (not Windows `compact.exe`):
+
+```bash
+cd midnight
+npm install
+npm run compile
+cp .env.example .env.preprod
+# set MIDNIGHT_PREPROD_SEED and MIDNIGHT_EXPECTED_MODEL_HASH — never commit this file
+npm run proof:up
+npm run deploy
+```
+
+Copy the printed contract address into `MIDNIGHT_CONTRACT_ADDRESS` and `NEXT_PUBLIC_MIDNIGHT_CONTRACT_ADDRESS`.
+
+### Local Development
+
+```bash
+# frontend (mock oracle, default)
+pnpm install
+pnpm dev
+
+# Compact circuit tests
+cd midnight
+npm install
+npm run compile
+npm test
+```
+
+To point the UI at Midnight instead of mocks, `.env.local`:
+
+```env
+NEXT_PUBLIC_USE_MOCK_ORACLE=false
+NEXT_PUBLIC_MIDNIGHT_NETWORK=preprod
+NEXT_PUBLIC_MIDNIGHT_CONTRACT_ADDRESS=<deployed address>
+MIDNIGHT_CONTRACT_ADDRESS=<deployed address>
+```
+
+Do not put seeds in `NEXT_PUBLIC_*`.
+
+### Testing
+
+```bash
+cd midnight
+npm test
+```
+
+Network deploy tests (optional, needs Docker + funded seed):
+
+```bash
+npm run test:local
+npm run test:preprod
+```
+
+### Architecture
+
+```mermaid
+graph LR
+    A[On-chain / pool telemetry] --> B[Off-chain ML /score]
+    B --> C[Compact witnesses: private score + model hash]
+    C --> D[SafetyOracle.compact]
+    D --> E[Midnight ledger: isSafe only]
+    E --> F[Next.js inspector]
+```
+
+Details: [docs/MIDNIGHT_INTEGRATION.md](docs/MIDNIGHT_INTEGRATION.md) and [docs/ML_MIDNIGHT_INTERFACE.md](docs/ML_MIDNIGHT_INTERFACE.md).
+
+---
+
+## 📁 Project Structure
+
+```text
+SentinelZK/
+├── app/                  # Next.js App Router
+├── components/           # UI (inspector, wallet button, existing pages)
+├── lib/
+│   ├── sentinel-service.ts   # Mock / ML / Midnight switch
+│   ├── midnight/             # Wallet + contract client
+│   ├── ml-attestation.ts
+│   └── types.ts
+├── midnight/             # Compact contract, deploy, circuit tests
+│   ├── contracts/SafetyOracle.compact
+│   └── scripts/deploy.ts
+├── ml/                   # Off-chain GBDT (owned by the ML teammate)
+└── docs/
+    ├── MIDNIGHT_INTEGRATION.md
+    └── ML_MIDNIGHT_INTERFACE.md
+```
+
+Integrating SentinelZK checks into a dApp:
+
+### Querying via TypeScript
 
 ```typescript
-import { SentinelOracleClient } from '@sentinelzk/sdk'
+import { getSafetyAttestation } from '@/lib/midnight/client'
 
-const sentinel = new SentinelOracleClient({
-  network: 'midnight-preprod'
-})
-
-// Query safety attestation before allowing user deposit
-const attestation = await sentinel.getSafetyAttestation('0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D')
+const attestation = await getSafetyAttestation('0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D')
 
 if (!attestation.isSafe) {
-  throw new Error(`Transaction blocked: Risk detected (Proof: ${attestation.proofRef})`)
+  throw new Error(`Transaction blocked: Risk detected (Proof: ${attestation.proof.proofRef})`)
 }
-
-console.log('Contract verified safe by Midnight ZK Oracle!')
 ```
 
 ---
