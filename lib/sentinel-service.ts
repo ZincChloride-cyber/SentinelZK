@@ -3,6 +3,51 @@ import {
   OracleStats,
   AnalysisProgress,
 } from './types'
+import { attestationFromMlScore, type MlScoreResponse } from './ml-attestation'
+
+function mlServiceConfigured(): boolean {
+  // Server: real service URL. Browser: opt-in flag (URL stays server-only).
+  if (typeof window === 'undefined') {
+    return Boolean(process.env.SENTINEL_ML_URL?.trim())
+  }
+  return process.env.NEXT_PUBLIC_SENTINEL_USE_ML === '1'
+}
+
+/**
+ * Prefer server-side Next proxy (/api/score) in the browser;
+ * call the Python service directly when SENTINEL_ML_URL is available (Node).
+ */
+async function fetchMlAttestation(
+  address: string
+): Promise<ContractSafetyAttestation | null> {
+  const normalized = address.toLowerCase().trim()
+  const direct = process.env.SENTINEL_ML_URL?.trim()
+
+  try {
+    if (direct && typeof window === 'undefined') {
+      const res = await fetch(`${direct.replace(/\/$/, '')}/score`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: normalized }),
+        cache: 'no-store',
+      })
+      if (!res.ok) return null
+      const score = (await res.json()) as MlScoreResponse
+      return attestationFromMlScore(score)
+    }
+
+    const res = await fetch('/api/score', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address: normalized }),
+      cache: 'no-store',
+    })
+    if (!res.ok) return null
+    return (await res.json()) as ContractSafetyAttestation
+  } catch {
+    return null
+  }
+}
 
 // Mock database of pre-indexed and attested contracts
 const MOCK_ATTESTATIONS: Record<string, ContractSafetyAttestation> = {
@@ -235,14 +280,11 @@ export class SentinelService {
   static async getAttestation(address: string): Promise<ContractSafetyAttestation> {
     const normalized = address.toLowerCase().trim()
 
-    // --- FUTURE BACKEND CONNECTION HOOK ---
-    // If backend URL is provided, call real REST or GraphQL endpoint:
-    // const backendUrl = process.env.NEXT_PUBLIC_SENTINEL_API_URL
-    // if (backendUrl) {
-    //   const res = await fetch(`${backendUrl}/api/v1/attestations/${normalized}`)
-    //   if (!res.ok) throw new Error('Attestation not found')
-    //   return await res.json()
-    // }
+    // Prefer live GBDT scoring when the ML service is configured
+    if (mlServiceConfigured()) {
+      const live = await fetchMlAttestation(normalized)
+      if (live) return live
+    }
 
     if (MOCK_ATTESTATIONS[normalized]) {
       return MOCK_ATTESTATIONS[normalized]
@@ -320,7 +362,7 @@ export class SentinelService {
    * Oracle network telemetry
    */
   static async getOracleStats(): Promise<OracleStats> {
-    return {
+    const stats: OracleStats = {
       totalAttestations: 1482,
       verifiedSafePools: 1394,
       exploitsPrevented: 88,
@@ -329,6 +371,45 @@ export class SentinelService {
       registeredModelVersion: 'v1.2.0-gbdt',
       registeredModelHash: '0x7e834b92c4a91938501284719283471928471928374928173491823749182734',
     }
+
+    const direct = process.env.SENTINEL_ML_URL?.trim()
+    if (typeof window !== 'undefined') {
+      if (process.env.NEXT_PUBLIC_SENTINEL_USE_ML !== '1') {
+        return stats
+      }
+      try {
+        const res = await fetch('/api/score', { cache: 'no-store' })
+        if (res.ok) {
+          const payload = await res.json()
+          if (payload?.health?.modelVersionId) {
+            stats.registeredModelVersion = payload.health.modelVersionId
+            stats.registeredModelHash = payload.health.modelHash
+          }
+        }
+      } catch {
+        // keep mock stats
+      }
+      return stats
+    }
+
+    if (!direct) {
+      return stats
+    }
+
+    try {
+      const res = await fetch(`${direct.replace(/\/$/, '')}/health`, {
+        cache: 'no-store',
+      })
+      if (res.ok) {
+        const health = await res.json()
+        stats.registeredModelVersion = health.modelVersionId ?? stats.registeredModelVersion
+        stats.registeredModelHash = health.modelHash ?? stats.registeredModelHash
+      }
+    } catch {
+      // keep mock stats
+    }
+
+    return stats
   }
 
   /**

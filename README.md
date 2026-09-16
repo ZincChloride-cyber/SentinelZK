@@ -102,10 +102,35 @@ SentinelZK/
 │   ├── sentinel-hero.tsx       # Interactive WebGL hero section
 │   └── ui/                     # Reusable design components
 ├── lib/                  # Business logic & utilities
-│   ├── sentinel-service.ts     # Mock oracle feed & contract analyzer
+│   ├── sentinel-service.ts     # Oracle feed & contract analyzer (ML + mocks)
+│   ├── ml-attestation.ts       # Maps ML /score responses → attestations
 │   ├── types.ts                # TypeScript definitions & schemas
 │   └── utils.ts                # Helper utility functions
+├── ml/                   # Off-chain GBDT risk model (Python)
+│   ├── sentinel_ml/      # Feature schema, RiskModel, bootstrap telemetry
+│   ├── server.py         # FastAPI /score + /health
+│   ├── train.py          # Train from CSV (or synthetic bootstrap)
+│   └── artifacts/        # Serialized risk_gbdt.joblib
 └── PROJECT_ARCHITECTURE.md     # In-depth architectural & ZK circuit specs
+```
+
+### Optional: live ML scoring
+
+```bash
+cd ml
+python -m venv .venv
+.venv\Scripts\activate          # Windows
+pip install -r requirements.txt
+python train.py                 # bootstrap synthetic artifact
+uvicorn server:app --host 127.0.0.1 --port 8000
+```
+
+Copy `.env.example` to `.env.local` and set `SENTINEL_ML_URL` + `NEXT_PUBLIC_SENTINEL_USE_ML=1`. Without these, the UI keeps using demo mocks.
+
+Real labeled training (later):
+
+```bash
+python train.py --csv path/to/labeled_risk.csv
 ```
 
 ---

@@ -73,7 +73,7 @@ export circuit getSafetyAttestation(target: Address): Attestation {
           </div>
         </div>
 
-        <div className="relative rounded-2xl border border-white/10 bg-slate-950 p-4">
+        <div className="relative rounded-2xl border border-white/10 bg-slate-950/50 backdrop-blur-md p-4">
           <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-3">
             <span className="font-mono text-xs text-slate-400">
               {activeTab === 'sdk' ? 'verifyDeposit.ts' : 'SafetyOracle.compact'}

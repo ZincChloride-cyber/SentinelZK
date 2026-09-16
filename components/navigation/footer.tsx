@@ -2,7 +2,7 @@ import { ShieldCheck, ExternalLink } from 'lucide-react'
 
 export function Footer() {
   return (
-    <footer className="border-t border-white/10 bg-slate-950 py-12 px-4 sm:px-6 lg:px-8 text-xs text-slate-400">
+    <footer className="border-t border-white/10 bg-slate-950/50 backdrop-blur-md py-12 px-4 sm:px-6 lg:px-8 text-xs text-slate-400">
       <div className="mx-auto max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">

@@ -76,7 +76,7 @@ export function ContractInspector() {
       </div>
 
       {/* Search Bar & Demo Presets Container */}
-      <div className="mx-auto max-w-4xl rounded-2xl border border-white/10 bg-slate-900/80 p-4 sm:p-6 backdrop-blur-xl shadow-2xl">
+      <div className="mx-auto max-w-4xl rounded-2xl border border-white/10 bg-slate-900/55 p-4 sm:p-6 backdrop-blur-xl shadow-2xl">
         {/* Input form */}
         <form
           onSubmit={(e) => {

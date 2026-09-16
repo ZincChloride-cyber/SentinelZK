@@ -10,7 +10,7 @@ export default function HomePage() {
         secondaryCtaHref="/how-it-works"
       />
 
-      <section className="relative mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16 border-t border-white/5">
+      <section className="relative mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16 border-t border-white/5 bg-transparent">
         <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
           What this is
         </h2>

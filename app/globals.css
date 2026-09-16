@@ -60,6 +60,11 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body { margin: 0; background: #030712; color: #fff; font-family: var(--font-sans), 'Blakely', sans-serif; }
+/* Let the fixed WebGL site background show through page chrome */
+.site-panel {
+  background: rgba(2, 6, 23, 0.45);
+  backdrop-filter: blur(10px);
+}
 a { color: inherit; }
 ::selection { background: rgba(127, 180, 255, .35); }
 

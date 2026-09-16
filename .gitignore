@@ -18,3 +18,10 @@ node_modules
 *.md
 !/README.md
 !/readme.md
+!/ml/README.md
+
+# Python ML
+ml/.venv/
+ml/**/__pycache__/
+ml/**/*.pyc
+*.egg-info/
